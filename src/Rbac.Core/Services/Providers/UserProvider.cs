@@ -108,6 +108,33 @@ public class UserProvider(AppDbContext dbContext, IMapper mapper, IRoleProvider 
         return results?.OrderBy(x => x.Username).ToList() ?? null!;
     }
 
+    public async Task<bool> UpdateActiveAsync(Guid id, bool isActive)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (user == null)
+            return false;
+
+        user.IsActive = isActive;
+        user.UpdatedAt = DateTime.UtcNow;
+        dbContext.Users.Update(user);
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> UpdatePasswordAsync(Guid id, string hashedPassword)
+    {
+        var user = await dbContext.Users.FirstOrDefaultAsync(x => x.Id == id);
+        if (user == null)
+            return false;
+
+        user.PasswordHash = hashedPassword;
+        user.UpdatedAt = DateTime.UtcNow;
+        dbContext.Users.Update(user);
+        await dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
     public async Task<bool> UpdateUserAsync(UserUpdateRequest request)
     {
         var user = await dbContext.Users
