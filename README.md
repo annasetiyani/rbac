@@ -40,7 +40,7 @@ Simple role based access control API, not using open auth or microsoft generated
   }
 }
 ```
-
+* Add JWT settings in **secrets.json**. The full JWT settings are in [here](https://docs.google.com/document/d/1wvkmcVsb8eivLv95ENLl16KEnO-9IKIKiMA1idOQfC8/edit?usp=sharing).
 * Run the command below in the console to create the database.
 ```Text
 dotnet ef database update -s ..\Rbac.Api\Rbac.Api.csproj
@@ -70,4 +70,11 @@ dotnet run -p .\Rbac.Api\Rbac.Api.csproj
     - Contain at least one lowercase letter.
     - Contain at least one number.
     - Contain at least one special character.
-*
+4. The authorization is not applied during login. 
+5. The authorization is not yet applied to all endpoints.
+6. Login token is not yet saved in cache or cookies.
+7. Logout is not yet implemented.
+8. Security is not yet implemented.
+9. A proper error handling is not yet implemented.
+10. A proper logging is not yet implemented.
+11. A proper login process is not yet implemented.
