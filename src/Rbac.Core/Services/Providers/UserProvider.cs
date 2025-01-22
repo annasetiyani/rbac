@@ -40,6 +40,26 @@ public class UserProvider(AppDbContext dbContext, IMapper mapper, IRoleProvider 
         return user.Id;
     }
 
+    public async Task<bool> DeleteUserAsync(Guid id)
+    {
+        var userRoles = await dbContext.UserRoles
+            .Where(x => x.UserId == id)
+            .ToListAsync();
+        if (userRoles != null && userRoles.Count > 0)
+        {
+            dbContext.UserRoles.RemoveRange(userRoles);
+        }
+
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (user == null)
+            return false;
+        dbContext.Users.Remove(user);
+
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<UserItem> GetUserByIdAsync(Guid id)
     {
         var user = await dbContext.Users
@@ -86,6 +106,41 @@ public class UserProvider(AppDbContext dbContext, IMapper mapper, IRoleProvider 
             results.Add(userItem);
         }
         return results?.OrderBy(x => x.Username).ToList() ?? null!;
+    }
+
+    public async Task<bool> UpdateUserAsync(UserUpdateRequest request)
+    {
+        var user = await dbContext.Users
+            .FirstOrDefaultAsync(u => u.Id == request.Id);
+
+        if (user == null)
+            return false;
+        
+        user.Username = request.Username ?? user.Username;
+        user.Email = request.Email ?? user.Email;
+        user.UpdatedAt = DateTime.UtcNow;
+        dbContext.Users.Update(user);
+
+        var userRoles = await dbContext.UserRoles
+            .Where(x => x.UserId == user.Id)
+            .ToListAsync();
+
+        if (userRoles != null && userRoles.Count != 0)
+        {
+            dbContext.UserRoles.RemoveRange(userRoles);
+        }
+
+        foreach (var roleId in request.RoleIds)
+        {
+            await dbContext.UserRoles.AddAsync(new UserRole
+            {
+                UserId = user.Id,
+                RoleId = roleId
+            });
+        }
+
+        await dbContext.SaveChangesAsync();
+        return true;
     }
 
     private async Task<UserItem> ToUserItemAsync(User user)

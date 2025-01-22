@@ -25,6 +25,7 @@ public class UserCreateRequest
     public required string ConfirmPassword { get; set; }
 
     [Required]
+    [EmailAddress]
     [DataType(DataType.EmailAddress)]
     [RegularExpression("^[a-zA-Z0-9._|\\\\%#~`=?&/$^*!}{+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,4}"
         , ErrorMessage = "Password must meet requirements")]
