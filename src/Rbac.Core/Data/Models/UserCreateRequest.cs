@@ -32,5 +32,5 @@ public class UserCreateRequest
     public required string Email { get; set; }
 
     [Required]
-    public required Guid RoleId { get; set; }
+    public required IList<Guid> RoleIds { get; set; }
 }

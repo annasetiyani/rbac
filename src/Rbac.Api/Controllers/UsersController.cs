@@ -21,7 +21,6 @@ namespace Rbac.Api.Controllers
 
         // API: Get All Users
         [HttpGet]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUsersAsync()
         {
             try
@@ -40,7 +39,6 @@ namespace Rbac.Api.Controllers
 
         // API: Get User By Id
         [HttpGet("{id}")]
-        //[Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUserByIdAsync(Guid id)
         {
             try
@@ -70,8 +68,9 @@ namespace Rbac.Api.Controllers
                 if (!ValidatorExtention.IsValidEmail(request.Email))
                     return BadRequest("Invalid Email");
                 // Check if Role exists
-                if (request.RoleId == Guid.Empty || await roleProvider.GetRoleByIdAsync(request.RoleId) == null)
+                if (request.RoleIds == null || request.RoleIds.Count == 0 || request.RoleIds.Any(x => roleProvider.GetRoleByIdAsync(x) == null))
                     return BadRequest("Role does not exist.");
+
                 // Check if user already exists
                 if (await userProvider.GetUserByUsernameAsync(request.Username)!=null)
                     return BadRequest("Username already exists.");
@@ -94,6 +93,7 @@ namespace Rbac.Api.Controllers
             
         }
 
+        // API: Login
         [HttpPost("login")]
         public async Task<IActionResult> LoginAsync(UserLoginRequest request)
         {
@@ -109,6 +109,11 @@ namespace Rbac.Api.Controllers
                 if (user == null)
                 {
                     return Unauthorized("Invalid username.");
+                }
+
+                if(!user.IsActive)
+                {
+                    return Unauthorized("User is not active.");
                 }
 
                 if (!authService.VerifyPassword(request.Password, user.PasswordHash))
@@ -137,7 +142,8 @@ namespace Rbac.Api.Controllers
             return Ok("Logged out successfully.");
         }
 
-        [HttpPut("{userId}")]
+        // API: Update User
+        [HttpPut]
         public async Task<IActionResult> UpdateUserAsync(UserUpdateRequest request)
         {
             if(!ModelState.IsValid)
@@ -201,6 +207,7 @@ namespace Rbac.Api.Controllers
             
         }
 
+        // API: Activate User
         [HttpPost("activate/{id}")]
         public async Task<IActionResult> ActivateUserAsync(Guid id)
         {
@@ -230,7 +237,8 @@ namespace Rbac.Api.Controllers
             }
 
         }
-        
+
+        // API: Deactivate User
         [HttpPost("deactivate/{id}")]
         public async Task<IActionResult> DeactivateUserAsync(Guid id)
         {
@@ -260,6 +268,7 @@ namespace Rbac.Api.Controllers
             
         }
 
+        // API: Forgot Password
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPasswordAsync(UserForgotPasswordRequest request)
         {

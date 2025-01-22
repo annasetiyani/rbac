@@ -21,20 +21,22 @@ public class UserProvider(AppDbContext dbContext, IMapper mapper, IRoleProvider 
             PasswordHash = hashedPassword,
             Id = Guid.NewGuid(),
             Email = request.Email,
-            IsActive = true,
+            IsActive = false, //default to false. User need to be activated. 
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
         await dbContext.Users.AddAsync(user);
 
-        //add UserRole
-        var userRole = new UserRole
+        //add UserRoles
+        foreach (var roleId in request.RoleIds)
         {
-            UserId = user.Id,
-            RoleId = request.RoleId,
-        };
-        await dbContext.UserRoles.AddAsync(userRole);
-
+            dbContext.UserRoles.Add(new UserRole
+            {
+                UserId = user.Id,
+                RoleId = roleId
+            });
+        }
+        
         await dbContext.SaveChangesAsync();
 
         return user.Id;
