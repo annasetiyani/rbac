@@ -30,7 +30,34 @@ Simple role based access control API, not using open auth or microsoft generated
     ├────── /Interfaces    //Interface classes
     ├──────/Providers     //Provider classes
     ├Rbac.sln
+
     ```
+## Data Structure
+Struktur tabel:
+1. User: One user can have multiple roles.  
+    - UserId (Primary Key)
+    - Username
+    - Email
+    - PasswordHash
+    - IsActive
+    - CreatedAt
+    - UpdatedAt
+    - Roles (Many-to-many relationship with Role)
+2. Role: One role can have multiple permissions.  
+    - RoleId (Primary Key)
+    - RoleName
+    - Permissions (Many-to-many relationship with Permission)
+3. Permission : One permission can have multiple roles.  
+    - PermissionId (Primary Key)
+    - PermissionName
+    - Roles (Many-to-many relationship with Role))
+4. RolePermission : Pivot table for many-to-many relationship between Roles and Permissions.  
+    - RoleId (Foreign Key)
+    - PermissionId (Foreign Key)
+5. UserRole: Pivot table for many-to-many relationship between Users and Roles.  
+    - UserId (Foreign Key)
+    - RoleId (Foreign Key)
+
 ## How to set up local development database
 * Paste the setting below in **secrets.json** and replace **[dbName]** with the .db file in the root project, then save the file.
 ```JSON
